@@ -27,9 +27,9 @@ public class Member extends Model {
   );
   
   public static Member findByNumber(String number) {
-    List<Member> results = find.where().eq("number",number);
+    List<Member> results = find.where().eq("number",number).findList();
     if (results.size() > 0) {
-      return reults.get(0); // These should be unique anyway...
+      return results.get(0); // These should be unique anyway...
     }
     return null;
   }
