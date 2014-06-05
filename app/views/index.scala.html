@@ -1,7 +1,25 @@
-@(message: String)
+@(teams: List[models.Team], pusher_key: String)
 
-@main("Welcome to Play 2.0") {
-    
-    @play20.welcome(message, style = "Java")
-    
+@main("Twilio - Devoxx 2014 Table Football Tournament") {
+  <header>
+    <img class="full-width" src="@routes.Assets.at("images/header.png")"></img>
+  </header>
+  <article>
+  <table>
+    <tr>
+      <th class="rank">RANK</th>
+      <th>NAME</th>
+      <th class="score">SCORE</th>
+    </tr>
+  
+  @for(index <- 0 until teams.size) {
+
+    <tr class='@if(index % 2 == 1) { alternate }'>
+      <td class="rank"><div class="rank">@index</div></td>
+      <td>@teams(index).name</td>
+      <td class="score">@teams(index).computeScore()</td>
+    </tr>
+  }  
+  </table>
+  </article>
 }

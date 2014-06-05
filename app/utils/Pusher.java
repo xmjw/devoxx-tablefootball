@@ -1,4 +1,4 @@
-package util;
+package utils;
 
 import play.*;
 import java.io.BufferedReader;
@@ -14,16 +14,16 @@ import org.apache.commons.codec.binary.Hex;
 
 public class Pusher {
   
-  private static String PusherKey() {
-    return "";
+  public static String PusherKey() {
+  	return System.getenv().get("PUSHER_KEY");
   }
   
   private static String PusherSecret() {
-    return "";
+  	return System.getenv().get("PUSHER_SECRET");
   }
   
   private static String PusherAppId() {
-    return "";
+  	return System.getenv().get("PUSHER_APP_ID");
   }
   
   public static void send(String data, String event) {
@@ -32,6 +32,8 @@ public class Pusher {
     // Pusher path...
     String path = "/apps/" + PusherAppId() + "/channels/football_tournament/events";
 
+    Logger.info(path);
+
     // Query part of the URL, with authentication keys etc...
 		String query = "auth_key=" + PusherKey() +
 			"&auth_timestamp=" + (System.currentTimeMillis() / 1000) +
@@ -39,24 +41,46 @@ public class Pusher {
 			"&body_md5=" + md5(data) +
 			"&name=" + event;
 
+    Logger.info(query);
+
 		String key = "POST\n" + path + "\n" + query;
+
+    Logger.info(key);
+
 		String signature = sha256(PusherSecret(), key);
 
+    Logger.info(signature);
+
 		String uri = "http://api.pusherapp.com" + path + "?" + query + "&auth_signature=" + signature;
+   
+    Logger.info(uri);
    
     try {
       sendPost(uri,data);
     }
     catch (Exception e) {
-      Logger.error("A problem occured trying to send the data to pusher.");
+      Logger.error("A problem occured trying to send the data to pusher.",e);
     }
   }
   
   private static String md5(String data) {
     try {
+      Logger.info(data);
       MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] thedigest = md.digest(data.getBytes("UTF-8"));
-      return new String(thedigest);
+      byte[] data_bytes = data.getBytes("UTF-8");
+      byte[] hash = md.digest(data_bytes);
+      StringBuffer hexString = new StringBuffer();
+
+      for (int i = 0; i < hash.length; i++) {
+        if ((0xff & hash[i]) < 0x10) {
+          hexString.append("0" + Integer.toHexString((0xFF & hash[i])));
+        } else {
+          hexString.append(Integer.toHexString(0xFF & hash[i]));
+        }
+      }
+
+      Logger.info("Digest = "+hexString);
+      return new String(hexString);
     }
     catch (Exception e)
     {
@@ -77,11 +101,10 @@ public class Pusher {
     }
   }
   
-  private static void sendPost(String uri, String data) throws Exception {
+  private static void sendPost(String url, String data) throws Exception {
  
-		String url = "https://selfsolve.apple.com/wcResults.do";
 		URL obj = new URL(url);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
  
 		//add reuqest header
 		con.setRequestMethod("POST");

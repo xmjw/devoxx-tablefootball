@@ -1,0 +1,68 @@
+html, body { 
+  height: 99%;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+body {
+  border: 10px solid #FFF;
+  margin: 0px;
+  background: url('/assets/images/background.png') no-repeat;
+  background-size: 100% auto;
+}
+
+.full-width {
+  margin: 50px 0px 0px 50px;
+  max-width: 75%;
+  height: auto;
+}
+
+table {
+  width: 90%;
+  border-collapse: collapse;
+  margin-top: 50px;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+th {
+  padding: 5px 20px 5px 20px;
+  background-color: #2d2c2a;
+  color: #FFF; 
+  text-align: left;
+  border: 1px solid #2d2c2a;
+  font-weight: normal;
+}
+
+td {
+  padding: 20px;
+  font-size: 2em;
+  font-weight: normal;
+  color: #2d2c2a;
+  border: 1px solid #a49f94;
+}
+
+th.rank, td.rank {
+  width: 60px;
+}
+
+th.score, td.score {
+  width: 75px;
+}
+
+
+tr {
+  background-color: rgba(85, 195, 195, 0.25);
+  border: 1px solid #a49f94;
+}
+
+tr.alternate {
+  background-color: #54c4c2;
+}
+
+div.rank {
+  border-radius:25px;
+  background-color: #2d2c2a;
+  color: #FFF; 
+  padding: 0px 8px 0px 8px;
+  width: 20px;
+}

@@ -15,6 +15,7 @@ create table game (
 
 create table member (
   id                        bigint not null,
+  team_id                   bigint,
   name                      varchar(255),
   number                    varchar(255),
   constraint pk_member primary key (id))
@@ -34,6 +35,8 @@ create sequence member_seq;
 
 create sequence team_seq;
 
+alter table member add constraint fk_member_team_1 foreign key (team_id) references team (id);
+create index ix_member_team_1 on member (team_id);
 
 
 

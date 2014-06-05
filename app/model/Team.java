@@ -13,7 +13,7 @@ public class Team extends Model {
   @Id
   public Long id;
   
-  @ManyToOne
+  @OneToMany(mappedBy = "team")
   public List<Member> members;
   
   @Required
@@ -33,6 +33,10 @@ public class Team extends Model {
   
   public static void delete(Long id) {
     find.ref(id).delete();
+  }
+    
+  public int computeScore() {
+    return 1;
   }
     
 }

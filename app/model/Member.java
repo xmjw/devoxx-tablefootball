@@ -13,7 +13,7 @@ public class Member extends Model {
   @Id
   public Long id;
   
-  @OneToMany
+  @ManyToOne(cascade = CascadeType.PERSIST)
   public Team team;
   
   @Required

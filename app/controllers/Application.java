@@ -15,10 +15,29 @@ public class Application extends Controller {
  
   // This will show the leaderboard. 
   public static Result index() {
-    int m_count = Member.all().size();
-    int t_count = Team.all().size();
+    //Pusher.send("{\"data\":\"{\\\"message\\\":\\\"DOUBLE CHECKING....\\\"}}","my_event");
+    return ok(index.render(Team.all(),Pusher.PusherKey()));
+  }
 
-    return ok("There are "+m_count+" members, "+t_count+" teams.");
+  public static Result delete() {
+    int items = 0;
+    for (Member m : Member.all()) {
+      items++;
+      m.delete();
+    }
+    for (Team m : Team.all()) {
+      items++;
+      m.delete();
+    }
+    for (Game m : Game.all()) {
+      items++;
+      m.delete();
+    }
+    for (Fixture m : Fixture.all()) {
+      items++;
+      m.delete();
+    }
+    return ok("Deleted "+items+" items from the database.");    
   }
   
   // This will handle all incoming SMS...
@@ -60,7 +79,8 @@ public class Application extends Controller {
       if (state.equals("join") || state.equals("help")) {
         //new user wants helps. Else, they want to join in the tournament.
         String text = Messages.non_member_help();
-        Message sms = new Message("string");
+        Message message = new Message("string");
+        twiml = safelyAppendElement(twiml, message);      
 
         Team new_team = new Team();
         new_team.name = "Some team.";
