@@ -24,6 +24,7 @@ create table member (
 create table team (
   id                        bigint not null,
   name                      varchar(255),
+  score                     integer,
   constraint pk_team primary key (id))
 ;
 
