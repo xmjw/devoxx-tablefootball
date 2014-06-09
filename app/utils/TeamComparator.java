@@ -7,6 +7,8 @@ import models.*;
 public class TeamComparator implements Comparator<Team> {
     @Override
     public int compare(Team left, Team right) {
-      return right.computeScore() - left.computeScore();
+      int res = right.wins - left.wins;
+      if (res == 0) res = left.loses - right.loses;
+      return res;
     }
 }

@@ -8,11 +8,6 @@ create table fixture (
   constraint pk_fixture primary key (id))
 ;
 
-create table game (
-  id                        bigint not null,
-  constraint pk_game primary key (id))
-;
-
 create table member (
   id                        bigint not null,
   team_id                   bigint,
@@ -24,16 +19,16 @@ create table member (
 create table team (
   id                        bigint not null,
   name                      varchar(255),
-  score                     integer,
   playing                   boolean,
   seeking                   boolean,
+  temp_score                integer,
+  wins                      integer,
+  loses                     integer,
   playing_against           bigint,
   constraint pk_team primary key (id))
 ;
 
 create sequence fixture_seq;
-
-create sequence game_seq;
 
 create sequence member_seq;
 
@@ -48,15 +43,11 @@ create index ix_member_team_1 on member (team_id);
 
 drop table if exists fixture cascade;
 
-drop table if exists game cascade;
-
 drop table if exists member cascade;
 
 drop table if exists team cascade;
 
 drop sequence if exists fixture_seq;
-
-drop sequence if exists game_seq;
 
 drop sequence if exists member_seq;
 

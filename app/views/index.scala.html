@@ -18,7 +18,7 @@
     <tr class='@if(index % 2 == 1) { alternate }'>
       <td class="rank"><div class="rank">@(index+1)</div></td>
       <td id="name_@(index+1)">@teams(index).name</td>
-      <td id="score_@(index+1)" class="score">@teams(index).computeScore()</td>
+      <td id="score_@(index+1)" class="score">@teams(index).wins</td>
     </tr>
   }  
   </table>

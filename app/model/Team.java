@@ -21,14 +21,20 @@ public class Team extends Model {
   @Required
   public String name;
 
-  //Last computed score.
-  private int score = -1;
-  
   // If this team is playing a game...
   public Boolean playing = false;
   
   // If this team is seeking to play a game.
   public Boolean seeking = true;
+  
+  // Score for the game we're playing, until we know if it was a win or a loss...
+  public int tempScore = 0;
+  
+  // All the games we won...
+  public int wins;
+  
+  // All the games we lost.
+  public int loses;
   
   //Loose connection to the team you're playing against, to avoid Play 2.1 caching, may or may not be an issue.
   public Long playing_against;
@@ -87,12 +93,32 @@ public class Team extends Model {
     find.ref(id).delete();
   }
     
+  // When this team has won, increment score, and reset to looking.
+  public void won() {
+    wins++;
+    abort();
+  } 
   
-  public int computeScore() {
-    if (score == -1) {
-      if (random == null) random = new Random();
-      score = Team.random.nextInt(15);
-    }
-    return score;
-  }   
+  // When this team has lost, increment loss count, and reset to looking.
+  public void lost() {
+    loses++;
+    abort();
+  } 
+    
+    
+  // Something went wrong, we want to ditch this game and move on to playing other teams.    
+  public void abort() {
+    playing = false;
+    seeking = true;
+    tempScore = -1;
+    playing_against = -1L;
+  }
+
+  // We have decided to play this team!
+  public void play(Team t) {
+    playing = true;
+    seeking = false;
+    tempScore = -1;
+    playing_against = t.id;
+  }
 }

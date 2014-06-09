@@ -29,14 +29,6 @@ public class Application extends Controller {
       items++;
       m.delete();
     }
-    for (Game m : Game.all()) {
-      items++;
-      m.delete();
-    }
-    for (Fixture m : Fixture.all()) {
-      items++;
-      m.delete();
-    }
     return ok("Deleted "+items+" items from the database.");    
   }
 
@@ -61,7 +53,7 @@ public class Application extends Controller {
     return team;
   }
 
-  private static Team create_member(Member member, String body, String from) {
+  private static Member create_member(Member member, String body, String from) {
     member = new Member();
     member.number = from;
     member.name = body; //obviously needs imrpoving...
@@ -70,69 +62,115 @@ public class Application extends Controller {
     return member;    
   }
 
-  private static String decision_tree(Member member,String state, String body, String from) {
-    if (member == null) {
-      //Is person asking for help?
-      if state.equals("help"){
-        return "new_help";
-      }
+  private static void NoMember(Member member,String state, String body, String from) {
+    //Is person asking for help?
+    if (state.equals("join")) {
+      member = create_member(member, body, from);
       //Create a member. Can we put it in a team?
-      else if (state.equals("join")) {
-
-        if (member.team.size() == 2) {
-          return "new_team"
-        }
-        else {
-          return "team_waiting"
-        }
-      }
-    }
-    else {
-      //Already a member, and we have that in variable member.
-      if (state.equals("play")) {
-        
-      }
-      else if (state.equals("challenge")) {
-        
-      }
-      else if (state.equals("accept")) {
-        
-      }
-      else if (state.equals("score")) {
-        
-      }
-      else if (state.equals("abort")) {
-        
-      }
-      else
-        return "existing_help";
-      }
-      
-    }
-
-    if (member == null) {
-      if (state.equals("join") || state.equals("help")) {
-        //new user wants helps. Else, they want to join in the tournament.
-        String text = Messages.non_member_help();
-        Message message = new Message("string");
-
-
-
+      if (member.team.members.size() == 2) {
+        TwilioNotifier.NewTeam(member.team);
       }
       else {
-        //We don't have a member, and they didn't want to do anything that was meaningful.
-        String text = Messages.non_member_help();
-        Message message = new Message(text);
+        TwilioNotifier.TeamWaiting(member);
       }
     }
     else {
-      // We have a member...
-      String text = Messages.member_help();
-      Message message = new Message(text);
+      TwilioNotifier.NonMemberHelp(member);
     }
+  }
 
+  private static void MemberPlay(Member member) {
+    //Find a team that can be played, and isn't this one.
+    List<Team> teams = Team.all();
+    Team challenged = null;
+    Team team = member.team;
+    for (Team t : teams) {
+      if (t.seeking) {
+        challenged = t;
+      }
+    } 
+    
+    if (challenged != null) {
+      team.play(challenged);
+      challenged.play(team);
+      team.save();
+      challenged.save();
+      TwilioNotifier.Play(team,challenged);
+      TwilioNotifier.Play(challenged,team);
+    }
+    else {
+      TwilioNotifier.NoPlay(team);
+    }
+  }
 
-    return "help";
+  private static void GameOver(Team winner, Team loser) {
+    winner.won();
+    loser.lost();
+    winner.save();
+    loser.save();
+    TwilioNotifier.Win(winner, loser);
+    TwilioNotifier.Loss(loser, winner);
+  }
+
+  private static void GameDraw(Team team, Team against) {
+    team.tempScore = 0;
+    against.tempScore = 0;
+    team.save();
+    against.save();
+    TwilioNotifier.Draw(team,against);
+  }
+
+  private static void MemberScore(Member member) {
+    // Log a score for a game.
+    Team team = member.team;
+    Team against = Team.find.byId(team.playing_against);
+
+    //Both teams have registered a score!
+    if (against.tempScore != -1) {
+      if (team.tempScore > against.tempScore) GameOver(team,against); //Member wins.
+      else if (team.tempScore < against.tempScore) GameOver(against,team); //Against wins.
+      else GameDraw(team, against); // a draw!
+    }
+    else TwilioNotifier.ScorePending(team);
+  }
+
+  private static void MemberAbort(Member member) {
+    //Something went wrong. Cancel and reset to non-game playing.
+    Team team = member.team;
+    if (team.playing) {
+      Team against = Team.find.byId(team.playing_against);
+      team.abort();
+      against.abort();
+      team.save();
+      against.save();
+      TwilioNotifier.Abort(team);
+      TwilioNotifier.Abort(against);
+    }
+  }
+
+  private static void Member(Member member, String state) {
+    //Already a member, and we have that in variable member.
+    if (state.equals("play")) {
+      MemberPlay(member);
+    }
+    else if (state.equals("score")) {
+      MemberScore(member);
+    }
+    else if (state.equals("abort")) {
+      MemberAbort(member);
+    }
+    else {
+      TwilioNotifier.MemberHelp(member);
+    } 
+  }
+
+  private static void GameLogic(Member member,String state, String body, String from) {
+    if (member == null) {
+      NoMember(member, state, body, from);
+    }
+    else {
+      Member(member, state);
+    }
   }
 
   // This will handle all incoming SMS...
@@ -149,20 +187,15 @@ public class Application extends Controller {
     Member member = Member.findByNumber(from);
     String state = new SmsParser(body).getState();
     TwiMLResponse twiml = new TwiMLResponse();
-    String branch = decision_tree(member,state, body, from);
     
-    switch(branch) {
-      case "help":
-      default: 
-        Logger.info("Default out of branch.");
-        break;
-    }
+    // Handle everything..
+    GameLogic(member,state, body, from);
     
-
-
     //Might as well do this whenever we get something happening...
     pushTopFive();
-    return ok(twiml.toXML()).as("text/xml");
+    
+    //To simplify branching we will send SMS notifications with the REST API.
+    return ok("<Response></Response>").as("text/xml");
   }
 
   private static void pushTopFive() {
@@ -174,7 +207,7 @@ public class Application extends Controller {
     for (Team team : teams) {
       ObjectNode node = Json.newObject();
       node.put("name", team.name);
-      node.put("score", team.computeScore());
+      node.put("score", team.wins);
       data.put(Integer.toString(i),node);
       i++;
     }
