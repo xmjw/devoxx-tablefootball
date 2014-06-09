@@ -40,6 +40,101 @@ public class Application extends Controller {
     return ok("Deleted "+items+" items from the database.");    
   }
 
+  private static Team find_or_create_team() {
+    List<Team> teams = Team.all();
+    Team team = null;
+    
+    //find an empty team...
+    for (Team t : teams) {
+      if (t.members.size() == 1) {
+        team = t;
+      }
+    }
+
+    //nope. Create a team.
+    if (team == null) {
+      team = Team.CreateTeam();
+    }
+    team.save();
+    
+    // return the team...
+    return team;
+  }
+
+  private static Team create_member(Member member, String body, String from) {
+    member = new Member();
+    member.number = from;
+    member.name = body; //obviously needs imrpoving...
+    member.team = find_or_create_team();
+    member.save();
+    return member;    
+  }
+
+  private static String decision_tree(Member member,String state, String body, String from) {
+    if (member == null) {
+      //Is person asking for help?
+      if state.equals("help"){
+        return "new_help";
+      }
+      //Create a member. Can we put it in a team?
+      else if (state.equals("join")) {
+
+        if (member.team.size() == 2) {
+          return "new_team"
+        }
+        else {
+          return "team_waiting"
+        }
+      }
+    }
+    else {
+      //Already a member, and we have that in variable member.
+      if (state.equals("play")) {
+        
+      }
+      else if (state.equals("challenge")) {
+        
+      }
+      else if (state.equals("accept")) {
+        
+      }
+      else if (state.equals("score")) {
+        
+      }
+      else if (state.equals("abort")) {
+        
+      }
+      else
+        return "existing_help";
+      }
+      
+    }
+
+    if (member == null) {
+      if (state.equals("join") || state.equals("help")) {
+        //new user wants helps. Else, they want to join in the tournament.
+        String text = Messages.non_member_help();
+        Message message = new Message("string");
+
+
+
+      }
+      else {
+        //We don't have a member, and they didn't want to do anything that was meaningful.
+        String text = Messages.non_member_help();
+        Message message = new Message(text);
+      }
+    }
+    else {
+      // We have a member...
+      String text = Messages.member_help();
+      Message message = new Message(text);
+    }
+
+
+    return "help";
+  }
+
   // This will handle all incoming SMS...
   public static Result sms() {
     //final Map<String, String[]> values = request().body().asFormUrlEncoded();
@@ -54,57 +149,16 @@ public class Application extends Controller {
     Member member = Member.findByNumber(from);
     String state = new SmsParser(body).getState();
     TwiMLResponse twiml = new TwiMLResponse();
-
-    // Run through the different switches...
-    if (member == null)
-      Logger.info("Member is null.");
-    else
-      Logger.info("Member has an inexplicable value...");
-
-    Logger.info("Got a state: "+state);
-
-    if (member == null) {
-      if (state.equals("join") || state.equals("help")) {
-        //new user wants helps. Else, they want to join in the tournament.
-        String text = Messages.non_member_help();
-        Message message = new Message("string");
-        twiml = safelyAppendElement(twiml, message);      
-
-        List<Team> teams = Team.all();
-        Team team = null;
-        
-        for (Team t : teams) {
-          if (t.members.size() == 1) {
-            team = t;
-          }
-        }
-
-        if (team == null) {
-          team = Team.CreateTeam();
-        }
-
-        team.save();
-
-        Member new_member = new Member();
-        new_member.number = from;
-        new_member.name = body; //obviously needs imrpoving...
-        new_member.team = team;
-        new_member.save();
-
-      }
-      else {
-        //We don't have a member, and they didn't want to do anything that was meaningful.
-        String text = Messages.non_member_help();
-        Message message = new Message(text);
-        twiml = safelyAppendElement(twiml, message);
-      }
+    String branch = decision_tree(member,state, body, from);
+    
+    switch(branch) {
+      case "help":
+      default: 
+        Logger.info("Default out of branch.");
+        break;
     }
-    else {
-      // We have a member...
-      String text = Messages.member_help();
-      Message message = new Message(text);
-      twiml = safelyAppendElement(twiml, message);      
-    }
+    
+
 
     //Might as well do this whenever we get something happening...
     pushTopFive();

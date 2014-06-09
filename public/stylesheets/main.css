@@ -10,6 +10,17 @@ body {
   background-size: 100% auto;
 }
 
+header h3 {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-weight: normal;
+  text-align: center;
+  font-size: 2em;
+}
+
+span.cn {
+  font-family: "Courier New", Courier, monospace;
+}
+
 .full-width {
   margin: 50px 0px 0px 50px;
   max-width: 75%;

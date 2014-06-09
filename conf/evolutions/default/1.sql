@@ -25,6 +25,9 @@ create table team (
   id                        bigint not null,
   name                      varchar(255),
   score                     integer,
+  playing                   boolean,
+  seeking                   boolean,
+  playing_against           bigint,
   constraint pk_team primary key (id))
 ;
 

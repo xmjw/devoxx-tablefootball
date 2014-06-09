@@ -13,14 +13,25 @@ public class Team extends Model {
   @Id
   public Long id;
 
+  //Name and number of each player, so we can easily find them..
   @OneToMany(mappedBy = "team")
   public List<Member> members;
 
+  //The name of the team.
   @Required
   public String name;
 
+  //Last computed score.
   private int score = -1;
-
+  
+  // If this team is playing a game...
+  public Boolean playing = false;
+  
+  // If this team is seeking to play a game.
+  public Boolean seeking = true;
+  
+  //Loose connection to the team you're playing against, to avoid Play 2.1 caching, may or may not be an issue.
+  public Long playing_against;
 
   public static Team CreateTeam() {
     //Always double read a lock...
