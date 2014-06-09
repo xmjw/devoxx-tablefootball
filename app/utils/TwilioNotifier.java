@@ -37,9 +37,10 @@ public class TwilioNotifier {
       params.add(new BasicNameValuePair("From", TwilioNumber()));
  
       MessageFactory messageFactory = client.getAccount().getMessageFactory();
-      Message sms = messageFactory.create(params);
+      //Message sms = messageFactory.create(params);
+      //Logger.info("SMS To:"+to+" | "+sms.getSid()" | "+message+" |");
 
-      Logger.info("Just send a message with SID: "+sms.getSid());
+      Logger.info("SMS To:"+to+" | "+message+" |");
       return true;
     }
     catch (Exception e) {
@@ -95,8 +96,8 @@ public class TwilioNotifier {
     NotifyMember(member, Messages.TeamWaiting());
   }
 
-  public static void NonMemberHelp(Member member) {
-    NotifyMember(member,Messages.NonMemberHelp());
+  public static void NonMemberHelp(String from) {
+    SendSms(from,Messages.NonMemberHelp());
   }
   
   public static void MemberHelp(Member member) {

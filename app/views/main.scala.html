@@ -24,8 +24,22 @@
 
               for (var i = 1; i <= 5; i++) { 
                 if (data.data[i]) {
-                  $('#name_'+i.toString()).text(data.data[i].name)
-                  $('#score_'+i.toString()).text(data.data[i].score)
+                  
+                  if ($('#row_'+i.toString()).length != 0) {
+                    $('#name_'+i.toString()).text(data.data[i].name);
+                    $('#score_'+i.toString()).text(data.data[i].score);
+                  }
+                  else
+                  {
+                    //We need to add this row...
+                    var position = i.toString();
+                    var name = data.data[i].name;
+                    var score = data.data[i].score;
+                    var tr_class = "";
+                    
+                    if (i % 2 == 0) tr_class = "alternate";
+                    $('#rank_table').append("<tr id=\"row_"+position+"\" class=\""+tr_class+"\"><td class=\"rank\"><div class=\"rank\">"+position+"</div></td><td id=\"name_"+position+"\">"+name+"</td><td id=\"score_"+position+"\" class=\"score\">"+score+"</td></tr>");
+                  }
                 }
               }
             });

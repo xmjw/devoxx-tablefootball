@@ -40,11 +40,13 @@ public class Application extends Controller {
     for (Team t : teams) {
       if (t.members.size() == 1) {
         team = t;
+        Logger.info("Found a team with only one member.");
       }
     }
 
     //nope. Create a team.
     if (team == null) {
+      Logger.info("No teams are available, so creating a new one.");
       team = Team.CreateTeam();
     }
     team.save();
@@ -53,34 +55,43 @@ public class Application extends Controller {
     return team;
   }
 
-  private static Member create_member(Member member, String body, String from) {
+  private static Member create_member(Member member, String from) {
+    Logger.info("Creating a new member and allocating the team.");
+    Team team = find_or_create_team();
+    
     member = new Member();
     member.number = from;
-    member.name = body; //obviously needs imrpoving...
-    member.team = find_or_create_team();
+    member.team = team;
+    team.members.add(member);
     member.save();
+    team.save();
     return member;    
   }
 
-  private static void NoMember(Member member,String state, String body, String from) {
+  private static void NoMember(Member member,State state) {
     //Is person asking for help?
-    if (state.equals("join")) {
-      member = create_member(member, body, from);
+    if (state.is("join")) {
+      member = create_member(member, state.from);
+      Team team = member.team;
       //Create a member. Can we put it in a team?
-      if (member.team.members.size() == 2) {
+      if (team.members.size() == 2) {
+        Logger.info("Notifying team members that it's time to party.");
         TwilioNotifier.NewTeam(member.team);
       }
       else {
+        Logger.info("Notifying the member that they'll have to wait...");
         TwilioNotifier.TeamWaiting(member);
+        
       }
     }
     else {
-      TwilioNotifier.NonMemberHelp(member);
+      TwilioNotifier.NonMemberHelp(state.from);
     }
   }
 
   private static void MemberPlay(Member member) {
     //Find a team that can be played, and isn't this one.
+    Logger.info("Initiating a game for the member...");
     List<Team> teams = Team.all();
     Team challenged = null;
     Team team = member.team;
@@ -89,12 +100,14 @@ public class Application extends Controller {
         challenged = t;
       }
     } 
-    
+    Logger.info("Check to see if we have a challenger...");
     if (challenged != null) {
       team.play(challenged);
-      challenged.play(team);
+      challenged.play(team); 
+      Logger.info("Saving play state.");
       team.save();
       challenged.save();
+      Logger.info("Notifying...");
       TwilioNotifier.Play(team,challenged);
       TwilioNotifier.Play(challenged,team);
     }
@@ -120,10 +133,16 @@ public class Application extends Controller {
     TwilioNotifier.Draw(team,against);
   }
 
-  private static void MemberScore(Member member) {
+  private static void MemberScore(Member member, State state) {
     // Log a score for a game.
     Team team = member.team;
     Team against = Team.find.byId(team.playing_against);
+
+    team.tempScore = state.data;
+    team.save();
+
+    Logger.info("Reporting Team Indicates "+Integer.toString(state.data)+" (recorded as "+Integer.toString(team.tempScore)+")");
+    Logger.info("Against Team recorded score as "+Integer.toString(against.tempScore)+")");
 
     //Both teams have registered a score!
     if (against.tempScore != -1) {
@@ -131,7 +150,9 @@ public class Application extends Controller {
       else if (team.tempScore < against.tempScore) GameOver(against,team); //Against wins.
       else GameDraw(team, against); // a draw!
     }
-    else TwilioNotifier.ScorePending(team);
+    else {
+      TwilioNotifier.ScorePending(team);
+    }
   }
 
   private static void MemberAbort(Member member) {
@@ -148,15 +169,15 @@ public class Application extends Controller {
     }
   }
 
-  private static void Member(Member member, String state) {
+  private static void Member(Member member, State state) {
     //Already a member, and we have that in variable member.
-    if (state.equals("play")) {
+    if (state.is("play")) {
       MemberPlay(member);
     }
-    else if (state.equals("score")) {
-      MemberScore(member);
+    else if (state.is("score")) {
+      MemberScore(member,state);
     }
-    else if (state.equals("abort")) {
+    else if (state.is("abort")) {
       MemberAbort(member);
     }
     else {
@@ -164,9 +185,9 @@ public class Application extends Controller {
     } 
   }
 
-  private static void GameLogic(Member member,String state, String body, String from) {
+  private static void GameLogic(Member member,State state) {
     if (member == null) {
-      NoMember(member, state, body, from);
+      NoMember(member, state);
     }
     else {
       Member(member, state);
@@ -185,11 +206,13 @@ public class Application extends Controller {
 
     // Get a member and a status for the message.
     Member member = Member.findByNumber(from);
-    String state = new SmsParser(body).getState();
+    State state = new SmsParser(body, from).getState();
     TwiMLResponse twiml = new TwiMLResponse();
     
+    Logger.info("Resolved State: "+state.state);
+    
     // Handle everything..
-    GameLogic(member,state, body, from);
+    GameLogic(member,state);
     
     //Might as well do this whenever we get something happening...
     pushTopFive();
@@ -221,9 +244,13 @@ public class Application extends Controller {
   //Work out who the top 5 teams are...
   private static List<Team> topFiveTeams() {
     List<Team> teams = Team.all();
-    Collections.sort(teams, new TeamComparator());
-    int max = (teams.size() > 5 ? 5 : teams.size());
-    return teams.subList(0,max);
+    List<Team> pairedTeams = new ArrayList<Team>();
+    for (Team t : teams) {
+      if (t.members.size() == 2) pairedTeams.add(t);
+    }
+    Collections.sort(pairedTeams, new TeamComparator());    
+    int max = (pairedTeams.size() > 5 ? 5 : pairedTeams.size());
+    return pairedTeams.subList(0,max);
   }
 
   //Wrapper to handle errors we twiml.append()

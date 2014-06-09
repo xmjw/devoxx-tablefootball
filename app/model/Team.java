@@ -6,6 +6,7 @@ import utils.*;
 import play.db.ebean.*;
 import play.data.validation.Constraints.*;
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 public class Team extends Model {
@@ -13,6 +14,9 @@ public class Team extends Model {
   @Id
   public Long id;
 
+  @Version
+  public Timestamp lastUpdate;
+    
   //Name and number of each player, so we can easily find them..
   @OneToMany(mappedBy = "team")
   public List<Member> members;

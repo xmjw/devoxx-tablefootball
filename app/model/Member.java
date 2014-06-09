@@ -4,7 +4,7 @@ import java.util.*;
 
 import play.db.ebean.*;
 import play.data.validation.Constraints.*;
-
+import java.sql.Timestamp;
 import javax.persistence.*;
 
 @Entity
@@ -13,12 +13,12 @@ public class Member extends Model {
   @Id
   public Long id;
   
+  @Version
+  public Timestamp lastUpdate;
+      
   @ManyToOne(cascade = CascadeType.PERSIST)
   public Team team;
   
-  @Required
-  public String name;
-
   @Required
   public String number;
   

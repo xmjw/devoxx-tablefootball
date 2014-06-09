@@ -5,7 +5,7 @@ import models.*;
 // These are all the possible response messages we're using...
 public class Messages {  
   //In use...
-  public static String NonMemberHelp() { return "Hello!/r/nIf you'd like to play Twilio-Devoxx Table Football, SMS this number with 'join (yourname)' and you'll get further instructions."; }
+  public static String NonMemberHelp() { return "Hello! If you'd like to play Twilio-Devoxx Table Football, SMS this number with 'join' and you'll get further instructions."; }
   public static String MemberHelp() { return "Text 'play <teamname>' to play, or just 'play' if you'd like to play a random team, and we'll allocate one for you."; }
   public static String Win(Team against) { return "Congratulations! You won your match against "+against.name+". It certainly isn't over! Text back 'play' to find your next opponent."; }
   public static String Loss(Team against) { return "Bad luck! You lost your match against "+against.name+". Don't think it's all over? Text back 'play' and find your next opponent."; }

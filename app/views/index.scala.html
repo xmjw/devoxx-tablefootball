@@ -3,10 +3,10 @@
 @main("Twilio - Devoxx 2014 Table Football Tournament") {
   <header>
     <img class="full-width" src="@routes.Assets.at("images/header.png")"></img>
-    <h3>SMS "<span class="cn">join your_name</span>" (i.e., "<span class="cn">join Andrew</span>") to 07903518484 to join!</h3>
+    <h3>SMS "<span class="cn">join</span>" to 07903518484 to compete!</h3>
   </header>
   <article>
-  <table>
+  <table id="rank_table">
     <tr>
       <th class="rank">RANK</th>
       <th>NAME</th>
@@ -15,7 +15,7 @@
   
   @for(index <- 0 until teams.size) {
 
-    <tr class='@if(index % 2 == 1) { alternate }'>
+    <tr id="row_@(index+1)" class='@if(index % 2 == 1) { alternate }'>
       <td class="rank"><div class="rank">@(index+1)</div></td>
       <td id="name_@(index+1)">@teams(index).name</td>
       <td id="score_@(index+1)" class="score">@teams(index).wins</td>
