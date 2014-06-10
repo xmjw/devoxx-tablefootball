@@ -203,8 +203,18 @@ public class Application extends Controller {
     }
   }
 
+  public static boolean active() {
+    String state =  System.getenv().get("ACTIVE");
+    return (!state.equals("FALSE"));
+  }
+
   // This will handle all incoming SMS...
   public static Result sms() {
+    
+    if (active() == false) {
+      return ok("<Response><Message>Sorry, the tournament is now closed. Check out http://www.twilio.com to see how we built it with Twilio's API.</Message></Response>").as("text/xml");      
+    }
+    
     //final Map<String, String[]> values = request().body().asFormUrlEncoded();
     DynamicForm requestData = form().bindFromRequest();
     String from = requestData.get("From");
