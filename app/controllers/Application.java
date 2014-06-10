@@ -14,6 +14,15 @@ import org.codehaus.jackson.node.ObjectNode;
 
 public class Application extends Controller {
 
+  public static Result session_alert() {
+    TwilioNotifier.Session(Member.all());
+    return ok("Sent...");
+  }
+
+  public static Result report() {
+    return ok(report.render(Team.all()));
+  }
+
   // This will show the leaderboard. 
   public static Result index() {
     return ok(index.render(topFiveTeams(),Pusher.PusherKey()));

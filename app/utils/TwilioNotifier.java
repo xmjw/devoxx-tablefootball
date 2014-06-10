@@ -59,6 +59,12 @@ public class TwilioNotifier {
     }    
   }
 
+  public static void Session(List<Member> members) {
+    for(Member member : members) {
+      NotifyMember(member,Messages.Session());
+    }    
+  }
+
   public static void Loss(Team team, Team against) {
     NotifyTeam(team,Messages.Loss(against));    
   }

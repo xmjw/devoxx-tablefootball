@@ -16,4 +16,8 @@ public class Messages {
   public static String Abort() { return "You current match has been cancelled. Text back 'play' to find an opponent."; }
   public static String TeamWaiting() { return "Thanks for joining the Twilio-Devoxx Table Football Tournament. We're just trying to find you a partner for your team. We'll SMS you when we have someone and you can start playing!"; }
   public static String NewTeam(Team team) { return "Great news! You're now one half of team "+team.name+"! Text 'play' when you want to play a game, or we'll text you when you're randomly selected to play someone else. If you get stuck, text back with 'help'."; }
+
+  //Special case...
+  public static String Session() { return "Thanks for taking part in the Twilio-Devoxx Table Football Championship. Want to see some live code? Come to room 2 at 13:30 and where Michael will tell you about how it was built, and how you can use SMS and Voice calling in your own apps with Twilio!"; }
+  public static String Over() { return "Sorry, the tournament is over. Find out about the technology that made it work at htt://twilio.com"; }
 }

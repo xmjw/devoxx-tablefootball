@@ -1,0 +1,26 @@
+@(teams: List[models.Team])
+
+@main("Twilio - Devoxx 2014 Table Football Tournament") {
+  <table id="rank_table">
+    <tr>
+      <th class="rank">RANK</th>
+      <th>NAME</th>
+      <th class="score">WINS</th>
+      <th class="score">LOSES</th>
+      <th class="score">MEMBER 1</th>
+      <th class="score">MEMBER 2</th>
+    </tr>
+  
+  @for(index <- 0 until teams.size) {
+
+    <tr class='@if(index % 2 == 1) { alternate }'>
+      <td class="rank"><div class="rank">@(index+1)</div></td>
+      <td>@teams(index).name</td>
+      <td>@teams(index).wins</td>
+      <td>@teams(index).loses</td>
+      <td>@teams(index).members(0).number</td>
+      <td>@teams(index).members(1).number</td>
+    </tr>
+  }  
+  </table>
+}
