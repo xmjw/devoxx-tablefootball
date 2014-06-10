@@ -37,10 +37,10 @@ public class TwilioNotifier {
       params.add(new BasicNameValuePair("From", TwilioNumber()));
  
       MessageFactory messageFactory = client.getAccount().getMessageFactory();
-      //Message sms = messageFactory.create(params);
-      //Logger.info("SMS To:"+to+" | "+sms.getSid()" | "+message+" |");
+      Message sms = messageFactory.create(params);
+      Logger.info("SMS To:"+to+" | "+sms.getSid()+" | "+message+" |");
 
-      Logger.info("SMS To:"+to+" | "+message+" |");
+      //Logger.info("SMS To:"+to+" | "+message+" |");
       return true;
     }
     catch (Exception e) {
