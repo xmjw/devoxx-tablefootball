@@ -7,6 +7,7 @@ import play.libs.*;
 import play.mvc.*;
 import play.data.*;
 import views.html.*;
+import play.db.ebean.Transactional;
 import com.twilio.sdk.verbs.*;
 import java.util.*;
 import org.codehaus.jackson.node.ObjectNode;
@@ -28,6 +29,7 @@ public class Application extends Controller {
     return ok(index.render(topFiveTeams(),Pusher.PusherKey()));
   }
 
+  @Transactional
   public static Result delete() {
     int items = 0;
     for (Member m : Member.all()) {
@@ -41,6 +43,7 @@ public class Application extends Controller {
     return ok("Deleted "+items+" items from the database.");    
   }
 
+  @Transactional
   private static Team find_or_create_team() {
     List<Team> teams = Team.all();
     Team team = null;
@@ -64,6 +67,7 @@ public class Application extends Controller {
     return team;
   }
 
+  @Transactional
   private static Member create_member(Member member, String from) {
     Logger.info("Creating a new member and allocating the team.");
     Team team = find_or_create_team();
@@ -98,6 +102,7 @@ public class Application extends Controller {
     }
   }
 
+  @Transactional
   private static void MemberPlay(Member member) {
     //Find a team that can be played, and isn't this one.
     Logger.info("Initiating a game for the member...");
@@ -111,11 +116,14 @@ public class Application extends Controller {
     } 
     Logger.info("Check to see if we have a challenger...");
     if (challenged != null) {
-      team.play(challenged);
-      challenged.play(team); 
       Logger.info("Saving play state.");
+
+      team.play(challenged);
       team.save();
+
+      challenged.play(team); 
       challenged.save();
+
       Logger.info("Notifying...");
       TwilioNotifier.Play(team,challenged);
       TwilioNotifier.Play(challenged,team);
@@ -125,23 +133,26 @@ public class Application extends Controller {
     }
   }
 
+  @Transactional
   private static void GameOver(Team winner, Team loser) {
     winner.won();
-    loser.lost();
     winner.save();
+    loser.lost();
     loser.save();
     TwilioNotifier.Win(winner, loser);
     TwilioNotifier.Loss(loser, winner);
   }
 
+  @Transactional
   private static void GameDraw(Team team, Team against) {
     team.tempScore = 0;
-    against.tempScore = 0;
     team.save();
+    against.tempScore = 0;
     against.save();
     TwilioNotifier.Draw(team,against);
   }
 
+  @Transactional
   private static void MemberScore(Member member, State state) {
     // Log a score for a game.
     Team team = member.team;
@@ -164,14 +175,15 @@ public class Application extends Controller {
     }
   }
 
+  @Transactional
   private static void MemberAbort(Member member) {
     //Something went wrong. Cancel and reset to non-game playing.
     Team team = member.team;
     if (team.playing) {
       Team against = Team.find.byId(team.playing_against);
       team.abort();
-      against.abort();
       team.save();
+      against.abort();
       against.save();
       TwilioNotifier.Abort(team);
       TwilioNotifier.Abort(against);
