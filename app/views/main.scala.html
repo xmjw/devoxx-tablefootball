@@ -8,42 +8,7 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
-        <script src="http://js.pusher.com/2.2/pusher.min.js" type="text/javascript"></script>
-          <script type="text/javascript">
-            // Enable pusher logging - don't include this in production
-            Pusher.log = function(message) {
-              if (window.console && window.console.log) {
-                window.console.log(message);
-              }
-            };
-
-            var thedata = ""
-            var pusher = new Pusher('95949fb235eee151b989');
-            var channel = pusher.subscribe('football_tournament');
-            channel.bind('update_scores', function(data) {
-
-              for (var i = 1; i <= 5; i++) { 
-                if (data.data[i]) {
-                  
-                  if ($('#row_'+i.toString()).length != 0) {
-                    $('#name_'+i.toString()).text(data.data[i].name);
-                    $('#score_'+i.toString()).text(data.data[i].score);
-                  }
-                  else
-                  {
-                    //We need to add this row...
-                    var position = i.toString();
-                    var name = data.data[i].name;
-                    var score = data.data[i].score;
-                    var tr_class = "";
-                    
-                    if (i % 2 == 0) tr_class = "alternate";
-                    $('#rank_table').append("<tr id=\"row_"+position+"\" class=\""+tr_class+"\"><td class=\"rank\"><div class=\"rank\">"+position+"</div></td><td id=\"name_"+position+"\">"+name+"</td><td id=\"score_"+position+"\" class=\"score\">"+score+"</td></tr>");
-                  }
-                }
-              }
-            });
-          </script>    </head>
+</head>
     <body>
         @content
     </body>

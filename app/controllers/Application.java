@@ -49,12 +49,12 @@ public class Application extends Controller {
     Team team = null;
     
     //find an empty team...
-    for (Team t : teams) {
+    /*for (Team t : teams) {
       if (t.members.size() == 1) {
         team = t;
         Logger.info("Found a team with only one member.");
       }
-    }
+    }*/
 
     //nope. Create a team.
     if (team == null) {
@@ -87,15 +87,15 @@ public class Application extends Controller {
       member = create_member(member, state.from);
       Team team = member.team;
       //Create a member. Can we put it in a team?
-      if (team.members.size() == 2) {
+      //if (team.members.size() == 2) {
         Logger.info("Notifying team members that it's time to party.");
         TwilioNotifier.NewTeam(member.team);
-      }
+      /*}
       else {
         Logger.info("Notifying the member that they'll have to wait...");
         TwilioNotifier.TeamWaiting(member);
         
-      }
+      }*/
     }
     else {
       TwilioNotifier.NonMemberHelp(state.from);
@@ -192,7 +192,7 @@ public class Application extends Controller {
 
   private static void Member(Member member, State state) {
     //Already a member, and we have that in variable member.
-    if (state.is("play")) {
+    /*if (state.is("play")) {
       MemberPlay(member);
     }
     else if (state.is("score")) {
@@ -203,7 +203,7 @@ public class Application extends Controller {
     }
     else {
       TwilioNotifier.MemberHelp(member);
-    } 
+    } */
   }
 
   private static void GameLogic(Member member,State state) {
