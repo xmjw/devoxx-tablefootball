@@ -125,4 +125,5 @@ public class Team extends Model {
     tempScore = -1;
     playing_against = t.id;
   }
+  
 }

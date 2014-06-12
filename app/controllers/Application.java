@@ -110,7 +110,7 @@ public class Application extends Controller {
     Team challenged = null;
     Team team = member.team;
     for (Team t : teams) {
-      if (t.seeking) {
+      if (t.seeking && t.members != null && t.members.size() == 1) {
         challenged = t;
       }
     } 
