@@ -5,8 +5,6 @@
     <tr>
       <th class="rank">RANK</th>
       <th>NAME</th>
-      <th class="score">WINS</th>
-      <th class="score">LOSES</th>
       <th class="score">MEMBER 1</th>
       <th class="score">MEMBER 2</th>
     </tr>
@@ -16,10 +14,8 @@
     <tr class='@if(index % 2 == 1) { alternate }'>
       <td class="rank"><div class="rank">@(index+1)</div></td>
       <td>@teams(index).name</td>
-      <td>@teams(index).wins</td>
-      <td>@teams(index).loses</td>
-      <td>@teams(index).members(0).number</td>
-      <td>@teams(index).members(1).number</td>
+      <td>@if(teams(index).members != null) { @if(teams(index).members.size > 0) { @teams(index).members(0).number}}</td>
+      <td>@if(teams(index).members != null) { @if(teams(index).members.size > 1) {@teams(index).members(1).number}}</td>
     </tr>
   }  
   </table>
